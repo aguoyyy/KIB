@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard S-I BANJIR</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #e7e7e7; }
+    .container { width: 400px; border: #a5a5a5; display: flex; flex-direction: row; justify-content: space-around; align-items: center; margin: 10px auto; }
+    .container > div { flex: 1; }
+    .card { background: #e7e7e7; margin: 20px auto; padding: 20px; border-radius: 30px; box-shadow: 4px 7px 15px 2px #c2c2c2, -5px -4px 12px 2px #ffffff; width: 400px; }
+    .card1 { background: #e7e7e7; flex: 1; margin: 10px auto; margin-right: 10px; padding: 20px; border-radius: 30px; box-shadow: 4px 7px 15px 2px #c2c2c2, -5px -4px 12px 2px #ffffff; width: 40%; height: 160px; }
+    .card2 { background: #e7e7e7; flex: 1; margin: 10px auto; margin-left: 10px; padding: 20px; border-radius: 30px; box-shadow: 4px 7px 15px 2px #c2c2c2, -5px -4px 12px 2px #ffffff; width: 40%; height: 160px; }
+    .status { font-size: 20px; text-align: center; }
+    .mainBox { background-color: #e2e2e2; width: 500px; height: 700px; margin: 20px auto; padding-left: 10px; padding-right: 10px; padding-bottom: 5px; padding-top: 5px; border-radius: 30px; box-shadow: 4px 7px 15px 2px #c2c2c2, -5px -4px 12px 2px #ffffff; }
+    .clipped-box {
+       width: 400px; height: 50px; background-color: #e2e2e2; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 4px 7px 15px 2px #a5a5a5, -3px -2px 12px 2px #ffffff; }
+    h1 { color: #003366; text-align: center; }
+    h6 { color: dimgrey; text-align: center; font-style: italic;}
+  </style>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+  <div class="mainBox">
+    <h1>Dashboard S-I BANJIR</h1>
+    <div class="clipped-box">Selamat datang di website sibanjir yang mana kalian dapat mengecek keadaan alat SI-banjir yang terpasang di daerah dekat rumah kalian</div>
+    <div class="container">
+        <div class="card1">
+          <h4>📏</h4>
+          <h3 class="status">Jarak</h3>
+          <p class="status" id="jarak">Loading</p>
+        </div>
+        
+        <div class="card2">
+          <h3 class="status">🌧</h3>
+          <h3 class="status">Status Hujan</h3>
+          <p class="status" id="hujan">Loading</p>
+        </div>
+    </div>
+
+    <div class="card">
+      <h3>🚨 Peringatan</h3>
+      <p class="status" id="peringatan">Loading...</p>
+    </div>
+  </div>
+
+<script>
+  const broker = 'wss://broker.hivemq.com:8884/mqtt';
+  const client = mqtt.connect(broker);
+
+  client.on('connect', () => {
+    console.log('Terhubung ke broker MQTT');
+    client.subscribe('sibanir/daerahB/jarak');
+    client.subscribe('sibanir/daerahB/hujan');
+    client.subscribe('sibanir/daerahB/status');
+  });
+
+  client.on('message', (topic, message) => {
+    const text = message.toString();
+    if (topic === 'sibanir/daerahB/jarak') {
+      document.getElementById('jarak').innerText = `${text} cm`;
+    }
+    if (topic === 'sibanir/daerahB/hujan') {
+      document.getElementById('hujan').innerText = text === '1' ? 'Hujan' : 'Tidak Hujan';
+    }
+    if (topic === 'sibanir/daerahB/status') {
+      document.getElementById('peringatan').innerText = text;
+    }
+  });
+</script>
+<h6>@Copyright SMKN1 KOTA TANGERANG SELATAN 2025</h6>
+</body>
+</html>
